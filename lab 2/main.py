@@ -1,42 +1,34 @@
 import cv2
 import numpy as np
 import os
-from typing import List, Tuple  # Added missing imports
+from typing import List, Tuple  
 import matplotlib.pyplot as plt
 
 def preprocess_image(img: np.ndarray) -> np.ndarray:
-    # Convert to grayscale
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # Apply Gaussian blur
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    
-    # Apply histogram equalization
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     equalized = clahe.apply(blurred)
     
     return equalized
 
 def detect_buildings_color(img: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray]]:
-    # Convert to HSV color space
+    
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     
-    # Define color range for buildings (wider range to catch more buildings)
-    lower_color = np.array([0, 0, 100])  # Lower bound for light colors
-    upper_color = np.array([180, 50, 255])  # Upper bound
+    lower_color = np.array([0, 0, 100])  
+    upper_color = np.array([180, 50, 255])
     
-    # Create mask for building colors
     mask = cv2.inRange(hsv, lower_color, upper_color)
     
-    # Apply morphological operations to clean up the mask
     kernel = np.ones((3, 3), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
     
-    # Find contours
+    
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Filter contours by area and shape
     min_area = 100
     filtered_contours = []
     
@@ -45,18 +37,16 @@ def detect_buildings_color(img: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray
         if area < min_area:
             continue
             
-        # Get the minimum area rectangle
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect)
         box = np.int0(box)
         
-        # Filter by aspect ratio
         width, height = rect[1]
         if width == 0 or height == 0:
             continue
             
         aspect_ratio = max(width, height) / (min(width, height) + 1e-5)
-        if 0.2 < aspect_ratio < 5.0:  # Reasonable building aspect ratio
+        if 0.2 < aspect_ratio < 5.0:  
             filtered_contours.append(box)
     
     return mask, filtered_contours
@@ -64,13 +54,11 @@ def detect_buildings_color(img: np.ndarray) -> Tuple[np.ndarray, List[np.ndarray
 def display_results(original: np.ndarray, mask: np.ndarray, contours: List[np.ndarray]):
     plt.figure(figsize=(18, 6))
     
-    # 1. Show filtered mask
     plt.subplot(1, 3, 1)
     plt.imshow(mask, cmap='gray')
     plt.title('Filtered Image (Mask)')
     plt.axis('off')
     
-    # 2. Show vectorized contours
     plt.subplot(1, 3, 2)
     contour_img = np.zeros_like(original)
     if contours:
@@ -79,7 +67,6 @@ def display_results(original: np.ndarray, mask: np.ndarray, contours: List[np.nd
     plt.title('Vectorized Contours')
     plt.axis('off')
     
-    # 3. Show original image with detected buildings
     plt.subplot(1, 3, 3)
     result = original.copy()
     if contours:
