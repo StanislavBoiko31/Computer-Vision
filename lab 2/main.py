@@ -87,8 +87,6 @@ def main():
     
     def load_image(path: str) -> np.ndarray:
         img = cv2.imread(path, cv2.IMREAD_COLOR)
-        if img is None:
-            raise FileNotFoundError(f"Cannot load image: {path}")
         return img
 
     def save_results(img: np.ndarray, mask: np.ndarray, contours: List[np.ndarray], out_dir: str):
@@ -105,11 +103,8 @@ def main():
         print(f"Objects detected: {len(contours)}")
         print(f"Results saved to: {os.path.abspath(out_dir)}")
 
-    try:
-        img = load_image(INPUT_IMAGE)
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-        return
+
+    img = load_image(INPUT_IMAGE)
     
     print("Processing image...")
     mask, buildings = detect_buildings_color(img)
