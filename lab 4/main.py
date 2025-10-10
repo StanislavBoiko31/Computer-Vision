@@ -4,7 +4,7 @@ from enum import Enum
 
 class TrackingMethod(Enum):    
     MEAN_SHIFT = 1
-    CAM_SHIFT = 2
+    KCF = 2
     CSRT = 3
 
 class TrackerState:
@@ -273,7 +273,7 @@ def main():
     
     if method == TrackingMethod.MEAN_SHIFT.value:
         mean_shift_tracking(video_path)
-    elif method == TrackingMethod.CAM_SHIFT.value:
+    elif method == TrackingMethod.KCF.value:
         kcf_tracking(video_path)
     elif method == TrackingMethod.CSRT.value:
         csrt_tracking(video_path)
