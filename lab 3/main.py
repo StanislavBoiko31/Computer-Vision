@@ -36,7 +36,7 @@ def detect_buildings(img: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
         
         rect = cv2.minAreaRect(cnt)
         box = cv2.boxPoints(rect)
-        box = np.int0(box)
+        box = np.int32(box)
         
         width, height = rect[1]
 
